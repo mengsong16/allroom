@@ -4,8 +4,9 @@ allroom.egg-info
 .vscode
 data
 wandb
-checkpoints
-allroom/envs/gcsl_envs/dependencies
+runs
 figures
 tensorboard
+allroom/envs/gcsl_envs/dependencies
+allroom/experiments/runs
 
