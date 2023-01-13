@@ -1,0 +1,11 @@
+allroom.egg-info
+.DS_Store
+.history
+.vscode
+data
+wandb
+checkpoints
+allroom/envs/gcsl_envs/dependencies
+figures
+tensorboard
+
