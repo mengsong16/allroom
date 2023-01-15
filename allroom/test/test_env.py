@@ -25,6 +25,7 @@ def test_env(env_id, render=False):
         for i in range(500):  # max steps per episode
             action = env.action_space.sample()
             state, reward, done, info = env.step(action)
+            print(info)
             #if is_instance_gcsl_env(env):
             #         print(env.goal_distance())
             #    print(env.is_success())
@@ -96,6 +97,12 @@ def test_all_env(env_id):
                     
         print('Episode {} finished after {} timesteps.'.format(episode,i+1))
     
+    print('-----------------------------')
+    print(env.observation_space)
+    print(env.state_space)
+    print(env.goal_space)
+    print('-----------------------------')
+    
     env.close() 
 
 if __name__ == "__main__":  
@@ -153,5 +160,7 @@ if __name__ == "__main__":
     #env = gym.make("parking-v0")
     #print(get_wrapper_class(env))
     #test_env(env_id="pointmass-rooms-v0")
+    #test_env(env_id="bitflip-v0")
 
-    test_all_env('four-room-v0')
+    #test_all_env('four-room-v0')
+    test_all_env('bitflip-v0')

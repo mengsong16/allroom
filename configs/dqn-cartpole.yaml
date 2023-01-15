@@ -1,0 +1,29 @@
+# basic
+algorithm_name: "dqn"
+env_id: "CartPole-v0"
+runs_name: "test"
+goal_conditioned: false
+
+# cuda
+gpu_id: 0
+
+# seed
+seed: 1
+
+# Training settings
+minibatch_size: 64
+lr: 1.0e-3  # Adam optimizer settings
+update_frequency: 1
+target_update_frequency: 100
+discount_factor: 0.99
+timesteps: 4000
+
+# Replay buffer settings
+replay_start_size: 1000
+replay_buffer_size: 10000
+
+# Explicit exploration
+initial_exploration: 1.
+final_exploration: 0.
+final_exploration_step: 10000
+test_exploration: 0.001  # The exploration rate of the test Agent

@@ -203,25 +203,47 @@ class GoalGymEnvironment(GymEnvironment):
     
     def reset(self):
         dict_state = self._env.reset()
+        # Have to put each value to the correct device
         self._state = State(x={
-            'observation': dict_state['observation'],
+            'observation': torch.from_numpy(
+                np.array(dict_state['observation'],
+                dtype=np.float32)
+            ).to(self._device),
             'done': False,
             'reward': 0.,
-            'desired_goal': dict_state['desired_goal'],
-            'achieved_goal': dict_state['achieved_goal']
+            'desired_goal': torch.from_numpy(
+                np.array(dict_state['desired_goal'],
+                dtype=np.float32)
+            ).to(self._device),
+            'achieved_goal': torch.from_numpy(
+                np.array(dict_state['achieved_goal'],
+                dtype=np.float32)
+            ).to(self._device),
+            'is_success': False # assert info has key 'is_success'
         },device=self._device)
+
+        #print("reset to done: "+str(self._device))
         
         return self._state
 
     def step(self, action):
         dict_state, reward, done, info = self._env.step(self._convert(action))
-
+        # Have to put each value to the correct device
         data = {
-            'observation': dict_state['observation'],
+            'observation': torch.from_numpy(
+                np.array(dict_state['observation'],
+                dtype=np.float32)
+            ).to(self._device),
             'done': done,
-            'reward': reward,
-            'desired_goal': dict_state['desired_goal'],
-            'achieved_goal': dict_state['achieved_goal']
+            'reward': float(reward),
+            'desired_goal': torch.from_numpy(
+                np.array(dict_state['desired_goal'],
+                dtype=np.float32)
+            ).to(self._device),
+            'achieved_goal': torch.from_numpy(
+                np.array(dict_state['achieved_goal'],
+                dtype=np.float32)
+            ).to(self._device)
         }
 
         for key in info:
@@ -235,5 +257,11 @@ class GoalGymEnvironment(GymEnvironment):
     def duplicate(self, n):
         return DuplicateEnvironment([GoalGymEnvironment(self._id, device=self.device, name=self._name) for _ in range(n)])
 
-
+    @property
+    def observation_space(self):
+        return self._env.observation_space
+    
+    @property
+    def goal_space(self):
+        return self._env.goal_space
 

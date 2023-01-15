@@ -1,52 +1,67 @@
-from all.experiments import run_experiment, plot_returns_100
-#from all.presets.classic_control import dqn
+import os
+from all.experiments import run_experiment
 from all.environments import GymEnvironment
 from all.presets.builder import PresetBuilder
 from all.presets.classic_control.models import fc_relu_q
 from all.presets.classic_control.dqn import DQNClassicControlPreset
 from allroom.utils.path import *
+from allroom.utils.data_utils import *
+from allroom.envs.common import *
+from allroom.agents.models import goal_fc_relu_q
+from allroom.agents.goal_dqn import GoalDQNPreset
 
-def main():
-    hyperparameters = {
-        # Common settings
-        "discount_factor": 0.99,
-        # Adam optimizer settings
-        "lr": 1e-3,
-        # Training settings
-        "minibatch_size": 64,
-        "update_frequency": 1,
-        "target_update_frequency": 100,
-        "timesteps": 40000,
-        # Replay buffer settings
-        "replay_start_size": 1000,
-        "replay_buffer_size": 10000,
-        # Explicit exploration
-        "initial_exploration": 1.,
-        "final_exploration": 0.,
-        "final_exploration_step": 10000,
-        "test_exploration": 0.001,
-        # Model construction
-        "model_constructor": fc_relu_q,
-    }
-    
+def main(config_file_name):
     # the hyperparameter dictionary should not include keywords device and name
-    device = "cuda"
-    # need to explicitly ensure the agent and env are on the same device
-    agent = PresetBuilder(default_name='dqn', 
-            default_hyperparameters=hyperparameters, 
-            constructor=DQNClassicControlPreset,
-            device=device)
+    hyperparameters = parse_config(os.path.join(config_path, config_file_name))
 
+    # device
+    device = get_device_str(hyperparameters)
+
+    # runs directory
+    runs_dir = os.path.join(runs_path, hyperparameters["runs_name"])
+
+
+    if hyperparameters["goal_conditioned"]:
+        # q networks
+        hyperparameters["model_constructor"] = goal_fc_relu_q
+        # agent
+        agent = PresetBuilder(default_name=hyperparameters["algorithm_name"], 
+                default_hyperparameters=hyperparameters, 
+                constructor=GoalDQNPreset,
+                device=device)
+        # environment
+        env = GoalGymEnvironment(id=hyperparameters["env_id"], device=device)
+    else:
+        # q networks
+        hyperparameters["model_constructor"] = fc_relu_q
+        # need to explicitly ensure the agent and env are on the same device
+        # agent
+        agent = PresetBuilder(default_name=hyperparameters["algorithm_name"], 
+                default_hyperparameters=hyperparameters, 
+                constructor=DQNClassicControlPreset,
+                device=device)
+        # environment
+        env = GymEnvironment(id=hyperparameters["env_id"], device=device)       
+    
+    
+    # seed
+    # assume non-parallel environments
+    seed_env(env=env, seed=hyperparameters["seed"]) 
+    seed_other(seed=hyperparameters["seed"])
+    
+    # train and test
     run_experiment(
         agents=[agent],
-        envs=[GymEnvironment(id='CartPole-v0', device=device)],
+        envs=[env],
         frames=hyperparameters["timesteps"],
-        logdir=runs_path,
+        logdir=runs_dir,
         quiet=False, # if False print info to standard output 
         verbose=True, # whether or not to log all data or only summary metrics
     )
 
-    plot_returns_100(runs_path, timesteps=hyperparameters["timesteps"])
+    # plot training results
+    plot_returns_100(runs_dir, timesteps=hyperparameters["timesteps"])
 
 if __name__ == "__main__":
-    main()
+    #main(config_file_name = "dqn-cartpole.yaml")
+    main(config_file_name = "goal-dqn-bitflip.yaml")
