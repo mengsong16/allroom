@@ -13,7 +13,8 @@ class BitFlippingGymEnv(gym.Env):
     # https://github.com/openai/gym/blob/master/gym/core.py
     # Another way to set metadata is to set self.metadata in any of the class function
     metadata = {'render.modes': ['human']}
-    spec = EnvSpec(id_requested='bitflip-v0')
+    #spec = EnvSpec(id_requested='bitflip-v0') # use this when gym has version > 0.19.0
+    spec = EnvSpec(id='bitflip-v0')
 
     # environment_dimension: the length of bit sequence and the max length of episode
     def __init__(self, environment_dimension=20, random_goal=True, random_start=True):

@@ -14,7 +14,8 @@ class BaseMazeEnv(gym.Env, ABC):
     metadata = {'render.modes': ['human', 'rgb_array'],
                 'video.frames_per_second' : 3}
     reward_range = (-float('inf'), float('inf'))
-    spec = EnvSpec(id_requested='maze-v0')
+    #spec = EnvSpec(id_requested='maze-v0') # use this when gym has version > 0.19.0
+    spec = EnvSpec(id='maze-v0')
     
     def __init__(self):
         self.viewer = None

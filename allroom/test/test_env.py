@@ -17,7 +17,7 @@ def test_env(env_id, render=False):
         print("--------------------------------------")
         print('Episode: {}'.format(episode))
         state = env.reset()
-        print("State: %s"%state)
+        #print("State: %s"%state)
         if is_instance_goalreaching_env(env):
             print("Achieved goal: %s"%env.achieved_goal)
             print("Desired goal: %s"%env.desired_goal)
@@ -25,7 +25,7 @@ def test_env(env_id, render=False):
         for i in range(500):  # max steps per episode
             action = env.action_space.sample()
             state, reward, done, info = env.step(action)
-            print(info)
+            #print(info)
             #if is_instance_gcsl_env(env):
             #         print(env.goal_distance())
             #    print(env.is_success())
@@ -148,9 +148,10 @@ if __name__ == "__main__":
     maze_list = ['empty-maze-v0', 'umaze-v0', 'four-room-v0']
     bit_flip = ['bitflip-v0']
 
-    #test_envs(gym_goal_env_list)
-    #test_envs(gcsl_env_list)
-    #test_envs(maze_list)
+    test_envs(d4rl_env_list)
+    test_envs(gym_goal_env_list)
+    test_envs(gcsl_env_list)
+    test_envs(maze_list)
     #test_env('four-room-v0', render=False)
     #test_env('GoalGridworld-v0', render=True)
     #test_env("parking-v0", render=False)
@@ -163,4 +164,4 @@ if __name__ == "__main__":
     #test_env(env_id="bitflip-v0")
 
     #test_all_env('four-room-v0')
-    test_all_env('bitflip-v0')
+    #test_all_env('bitflip-v0')
