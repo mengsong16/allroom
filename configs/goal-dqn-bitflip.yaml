@@ -21,7 +21,7 @@ lr: 1.0e-3  # Adam optimizer settings
 update_frequency: 1  # update model for every n transition collected
 target_update_frequency: 100
 discount_factor: 0.99
-timesteps: 15000 #10000
+timesteps: 30000 #10000
 
 # replay buffer settings
 replay_start_size: 1000

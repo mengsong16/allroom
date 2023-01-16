@@ -162,8 +162,8 @@ def is_instance_goalreaching_env(env):
     else:
         return False    
 
-def create_env(env_id):
-    env = gym.make(env_id)
+def create_env(env_id, **kwarg):
+    env = gym.make(env_id, **kwarg)
     # wrap goal conditioned env
     if is_instance_gym_goal_env(env):
         env = GymToGoalReaching(env)
@@ -185,8 +185,8 @@ def get_wrapper_class(env):
 
 # wrapper goal conditioned env for All
 class GoalGymEnvironment(GymEnvironment):
-    def __init__(self, id, device, name=None):
-        self._env = create_env(id)
+    def __init__(self, id, device, name=None, **kwarg):
+        self._env = create_env(id, **kwarg)
         # check whether the environment is goal conditioned
         if not is_instance_goalreaching_env(self._env):
             print("Error: not a goal conditioned environment")
@@ -200,6 +200,7 @@ class GoalGymEnvironment(GymEnvironment):
         self._done = True
         self._info = None
         self._device = device
+        self._kwarg = kwarg  # kwarg is a dictionary
     
     def reset(self):
         dict_state = self._env.reset()
@@ -255,7 +256,7 @@ class GoalGymEnvironment(GymEnvironment):
     
     # for vector env
     def duplicate(self, n):
-        return DuplicateEnvironment([GoalGymEnvironment(self._id, device=self.device, name=self._name) for _ in range(n)])
+        return DuplicateEnvironment([GoalGymEnvironment(id=self._id, device=self.device, name=self._name, **self._kwarg) for _ in range(n)])
     
     def compute_reward(self, achieved_goal, desired_goal, info):
         return self._env.compute_reward(achieved_goal, desired_goal, info)

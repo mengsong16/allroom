@@ -10,8 +10,8 @@ from allroom.envs.bitflip import BitFlippingGymEnv
 import highway_env
 import multiworld.envs.gridworlds
 
-def test_env(env_id, render=False):
-    env = create_env(env_id)
+def test_env(env_id, render=False, **kwarg):
+    env = create_env(env_id, **kwarg)
     # if hasattr(env.unwrapped, 'random_start'):
     #     env.unwrapped.random_start = False
     # if hasattr(env.unwrapped, 'random_goal'):
@@ -80,8 +80,8 @@ def test_envs(env_list):
         print("%s Done"%env_id)
         print('-----------------------------') 
 
-def test_all_env(env_id):
-    env = GoalGymEnvironment(id=env_id, device="cuda")
+def test_all_env(env_id, **kwarg):
+    env = GoalGymEnvironment(id=env_id, device="cuda", **kwarg)
     
     print("====> Environment is wrapped for ALL: %s"%(env_id))
 
@@ -95,7 +95,7 @@ def test_all_env(env_id):
             action = env.action_space.sample()
             state = env.step(action)
 
-            print("State: %s"%state)
+            #print("State: %s"%state)
             
             if state.done: 
                 break
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     #env = gym.make("parking-v0")
     #print(get_wrapper_class(env))
     #test_env(env_id="pointmass-rooms-v0")
-    test_env(env_id="bitflip-v0")
+    #test_env(env_id="bitflip-v0", random_start=False, random_goal=False)
 
-    #test_all_env('four-room-v0')
-    #test_all_env('bitflip-v0')
+    test_all_env('four-room-v0')
+    #test_all_env('bitflip-v0', random_start=False, random_goal=False)

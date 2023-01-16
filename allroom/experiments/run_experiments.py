@@ -79,14 +79,16 @@ def main(config_file_name):
                 constructor=GoalDQNPreset,
                 device=device)
         # environment
-        env = GoalGymEnvironment(id=hyperparameters["env_id"], device=device)
-        inner_env = env.env.unwrapped
-        if hasattr(inner_env, 'random_start'):
-            inner_env.random_start = hyperparameters["random_start"]
+        if hyperparameters["env_id"] in ['bitflip-v0', 'empty-maze-v0', 'umaze-v0', 'four-room-v0']:
+            env = GoalGymEnvironment(id=hyperparameters["env_id"], device=device, 
+                random_start = hyperparameters["random_start"],
+                random_goal = hyperparameters["random_goal"])
+            inner_env = env.env.unwrapped
             print("======> Random start: %s"%inner_env.random_start)
-        if hasattr(inner_env, 'random_goal'):
-            inner_env.random_goal = hyperparameters["random_goal"]
             print("======> Random goal: %s"%inner_env.random_goal)
+        else:
+            env = GoalGymEnvironment(id=hyperparameters["env_id"], device=device)
+            
     else:
         # q networks
         hyperparameters["model_constructor"] = fc_relu_q
@@ -124,5 +126,5 @@ if __name__ == "__main__":
     #main(config_file_name = "dqn-cartpole.yaml")
     #main(config_file_name = "goal-dqn-bitflip.yaml")
     #main(config_file_name = "her-dqn-bitflip.yaml")
-    main(config_file_name = "goal-dqn-fourroom.yaml")
-    #main(config_file_name = "her-dqn-fourroom.yaml")
+    #main(config_file_name = "goal-dqn-fourroom.yaml")
+    main(config_file_name = "her-dqn-fourroom.yaml")
