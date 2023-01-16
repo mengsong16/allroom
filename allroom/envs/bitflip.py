@@ -47,6 +47,11 @@ class BitFlippingGymEnv(gym.Env):
         # else:
         #     self.desired_goal = [0 for _ in range(self.environment_dimension)]
         #     self.state = [1 for _ in range(self.environment_dimension)]
+        # print("------- reset -----------")
+        # print(self.random_start)
+        # print(self.random_goal)
+        # exit()
+
         if self.random_start:
             self.state = self.randomly_pick_state_or_goal()
         else:

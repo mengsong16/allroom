@@ -23,6 +23,22 @@ class BaseMaze(ABC):
         
         for key, value in kwargs.items():
             setattr(self, key, value)
+    
+    def __getstate__(self):
+        print("BaseMaze: I'm being pickled, delete objects because it is unpicklable.")
+        # save as a dictionary
+        new_dict = self.__dict__.copy()
+        del new_dict["objects"]
+        return new_dict
+        #return self.__dict__
+
+    def __setstate__(self, d):
+        print("BaseMaze: I'm being unpickled. Set objects as None.")
+        #self.__dict__ = d
+        self.__dict__.update(d)
+        # manully create a dummy
+        self.objects = None
+
 
     # maze size
     @property

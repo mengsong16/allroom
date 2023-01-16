@@ -129,14 +129,21 @@ class MazeEnv(BaseMazeEnv):
         #     return self.get_observation().copy(), float(reward), done, {"action_mask": self.get_action_mask(), 'is_success': success}
         
     def reset(self):
+        
         if self.random_start:   
             self.generate_start()
 
         if self.random_goal:
             self.generate_goal()
 
-        self.reset_robot()    
-        #self.print_start_goal()
+        self.reset_robot()   
+
+        # print("------- reset -----------")
+        # print(self.random_start)
+        # print(self.random_goal)
+        # self.print_start_goal()
+        # exit() 
+        
 
         self._achieved_goal = self.get_observation()
 

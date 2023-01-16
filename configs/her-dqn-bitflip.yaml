@@ -1,9 +1,9 @@
 # basic
-algorithm_name: "goal-dqn"
+algorithm_name: "her-dqn"
 env_id: "bitflip-v0"
 runs_name: "bitflip"
 goal_conditioned: true
-her: false
+her: true
 
 # cuda
 gpu_id: 0
@@ -11,9 +11,13 @@ gpu_id: 0
 # seed
 seed: 1
 
+# her
+relabel_strategy: "future"
+num_relabel: 4
+
 # env
-random_goal: false
-random_start: false
+random_goal: true
+random_start: true
 
 # training settings
 minibatch_size: 128
@@ -21,7 +25,7 @@ lr: 1.0e-3  # Adam optimizer settings
 update_frequency: 1  # update model for every n transition collected
 target_update_frequency: 100
 discount_factor: 0.99
-timesteps: 15000 #10000
+timesteps: 100000 #10000
 
 # replay buffer settings
 replay_start_size: 1000

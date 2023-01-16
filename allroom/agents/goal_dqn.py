@@ -16,51 +16,10 @@ from all.core.state import State, StateArray
 from all.agents._agent import Agent
 from allroom.utils.data_utils import *
 from allroom.utils.path import *
+from allroom.memory.her_replay_buffer import HERReplayBuffer
+from allroom.utils.data_utils import cat_state_goal, cat_states_goals
+import copy
 
-def clone_state_array(state_array):
-    x = {}
-    for key, value in state_array.items():
-        x[key] = value
-    
-    new_state_array = StateArray(x=x, shape=state_array.shape, device=state_array.device)
-
-    return new_state_array
-
-# cat a state array to a new state array
-def cat_states_goals(states):
-    # [B, state_dim+goal_dim] = [B, state_dim] + [B, goal_dim]
-    cat_tensor = torch.cat([states['observation'], states['desired_goal']], dim=1).to(device=states.device)
-
-    new_states = clone_state_array(states)
-    new_states['observation'] = cat_tensor
-    
-    return new_states
-
-def clone_state(state):
-    x = {}
-    for key, value in state.items():
-        x[key] = value
-    
-    
-    new_state = State(x=x, device=state.device)
-
-    # print('**********************')
-    # print(state.device)
-    # print(new_state.device)
-    # print('**********************')
-
-    return new_state
-    
-# cat a single state to a new state
-def cat_state_goal(state):
-    # [state_dim+goal_dim] = [state_dim] + [goal_dim]
-    # torch.cat: [1, state_dim+goal_dim] = [1, state_dim] + [1, goal_dim]
-    cat_tensor = torch.cat([state['observation'].unsqueeze(0), state['desired_goal'].unsqueeze(0)], dim=1).squeeze(0).to(device=state.device)
-    
-    new_state = clone_state(state)
-    new_state['observation'] = cat_tensor
-
-    return new_state
 
 class GoalDQN(DQN):
     # state: State
@@ -68,7 +27,7 @@ class GoalDQN(DQN):
         #print(state.shape)
         
         # store (s,a,r,s')
-        self.replay_buffer.store(self._state, self._action, state)
+        self.replay_buffer.store(copy.deepcopy(self._state), self._action, copy.deepcopy(state))
         # if necessary, update networks
         self._train()
         # update previous state self._state
@@ -140,10 +99,9 @@ class GoalDQNPreset(DQNClassicControlPreset):
         model_constructor (function): The function used to construct the neural model.
     """
 
-    # def __init__(self, env, name, device, **hyperparameters):
-    #     super().__init__(name, device, hyperparameters)
-    #     self.model = hyperparameters['model_constructor'](env).to(device)
-    #     self.n_actions = env.action_space.n
+    def __init__(self, env, name, device, **hyperparameters):
+        super().__init__(env, name, device, **hyperparameters)
+        self.env = env
 
     def agent(self, logger=DummyLogger(), train_steps=float('inf')):
         optimizer = Adam(self.model.parameters(), lr=self.hyperparameters['lr'])
@@ -168,10 +126,19 @@ class GoalDQNPreset(DQNClassicControlPreset):
             )
         )
 
-        replay_buffer = ExperienceReplayBuffer(
-            self.hyperparameters['replay_buffer_size'],
-            device=self.device
-        )
+        if self.hyperparameters['her']:
+            replay_buffer = HERReplayBuffer(
+                size=self.hyperparameters['replay_buffer_size'],
+                device=self.device,
+                env=self.env,
+                relabel_strategy=self.hyperparameters['relabel_strategy'], 
+                num_relabel=self.hyperparameters['num_relabel']
+            )
+        else:
+            replay_buffer = ExperienceReplayBuffer(
+                size=self.hyperparameters['replay_buffer_size'],
+                device=self.device
+            )
 
         return GoalDQN(
             q,

@@ -1,9 +1,9 @@
 # basic
-algorithm_name: "goal-dqn"
-env_id: "bitflip-v0"
-runs_name: "bitflip"
+algorithm_name: "her-dqn"
+env_id: "four-room-v0"
+runs_name: "four-room"
 goal_conditioned: true
-her: false
+her: true
 
 # cuda
 gpu_id: 0
@@ -11,24 +11,28 @@ gpu_id: 0
 # seed
 seed: 1
 
+# her
+relabel_strategy: "future"
+num_relabel: 4
+
 # env
-random_goal: false
-random_start: false
+random_goal: true
+random_start: true
 
 # training settings
-minibatch_size: 128
+minibatch_size: 64
 lr: 1.0e-3  # Adam optimizer settings
 update_frequency: 1  # update model for every n transition collected
 target_update_frequency: 100
 discount_factor: 0.99
-timesteps: 15000 #10000
+timesteps: 100000 #50000
 
 # replay buffer settings
 replay_start_size: 1000
-replay_buffer_size: 10000
+replay_buffer_size: 10000 #1000000
 
 # explicit exploration
 initial_exploration: 1.
 final_exploration: 0.
-final_exploration_step: 20000
+final_exploration_step: 10000
 test_exploration: 0.001  # The exploration rate of the test Agent

@@ -172,7 +172,7 @@ def create_env(env_id):
     else:
         print("The environment in neither a GCSL env nor a Gym goal env")
 
-    print("====> Environment created: %s"%(env_id))
+    print("======> Environment created: %s"%(env_id))
 
     return env	
 
@@ -210,7 +210,7 @@ class GoalGymEnvironment(GymEnvironment):
                 dtype=np.float32)
             ).to(self._device),
             'done': False,
-            'reward': 0.,
+            'reward': -1.,
             'desired_goal': torch.from_numpy(
                 np.array(dict_state['desired_goal'],
                 dtype=np.float32)
@@ -235,7 +235,7 @@ class GoalGymEnvironment(GymEnvironment):
                 dtype=np.float32)
             ).to(self._device),
             'done': done,
-            'reward': float(reward),
+            'reward': float(reward), # the reward got at current step
             'desired_goal': torch.from_numpy(
                 np.array(dict_state['desired_goal'],
                 dtype=np.float32)
@@ -256,6 +256,9 @@ class GoalGymEnvironment(GymEnvironment):
     # for vector env
     def duplicate(self, n):
         return DuplicateEnvironment([GoalGymEnvironment(self._id, device=self.device, name=self._name) for _ in range(n)])
+    
+    def compute_reward(self, achieved_goal, desired_goal, info):
+        return self._env.compute_reward(achieved_goal, desired_goal, info)
 
     @property
     def observation_space(self):

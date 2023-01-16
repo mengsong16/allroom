@@ -1,5 +1,5 @@
 import os
-from all.experiments import run_experiment
+#from all.experiments import run_experiment
 from all.environments import GymEnvironment
 from all.presets.builder import PresetBuilder
 from all.presets.classic_control.models import fc_relu_q
@@ -9,6 +9,54 @@ from allroom.utils.data_utils import *
 from allroom.envs.common import *
 from allroom.agents.models import goal_fc_relu_q
 from allroom.agents.goal_dqn import GoalDQNPreset
+#from all.experiments.single_env_experiment import SingleEnvExperiment
+from allroom.experiments.single_env_experiment import SingleEnvExperiment
+from all.experiments.parallel_env_experiment import ParallelEnvExperiment
+from all.presets import ParallelPreset
+
+def run_experiment(
+        agents,
+        envs,
+        frames,
+        logdir='runs',
+        quiet=False,
+        render=False,
+        test_episodes=100,
+        verbose=True,
+        logger="tensorboard"
+):
+    if not isinstance(agents, list):
+        agents = [agents]
+
+    if not isinstance(envs, list):
+        envs = [envs]
+
+    for env in envs:
+        for preset_builder in agents:
+            # experiment type is decided by the environment type, i.e. vector environment or not
+            preset = preset_builder.env(env).build()
+            make_experiment = get_experiment_type(preset)
+            experiment = make_experiment(
+                preset,
+                env,
+                train_steps=frames,
+                logdir=logdir,
+                quiet=quiet,
+                render=render,
+                verbose=verbose,
+                logger=logger
+            )
+            experiment.train(frames=frames)
+            experiment.save()
+            experiment.test(episodes=test_episodes)
+            experiment.close()
+
+
+def get_experiment_type(preset):
+    if isinstance(preset, ParallelPreset):
+        return ParallelEnvExperiment
+    return SingleEnvExperiment
+
 
 def main(config_file_name):
     # the hyperparameter dictionary should not include keywords device and name
@@ -20,8 +68,9 @@ def main(config_file_name):
     # runs directory
     runs_dir = os.path.join(runs_path, hyperparameters["runs_name"])
 
-
-    if hyperparameters["goal_conditioned"]:
+    goal_conditioned = hyperparameters.get("goal_conditioned", False)
+    print("======> Goal conditioned: %s"%goal_conditioned)
+    if goal_conditioned:
         # q networks
         hyperparameters["model_constructor"] = goal_fc_relu_q
         # agent
@@ -31,6 +80,13 @@ def main(config_file_name):
                 device=device)
         # environment
         env = GoalGymEnvironment(id=hyperparameters["env_id"], device=device)
+        inner_env = env.env.unwrapped
+        if hasattr(inner_env, 'random_start'):
+            inner_env.random_start = hyperparameters["random_start"]
+            print("======> Random start: %s"%inner_env.random_start)
+        if hasattr(inner_env, 'random_goal'):
+            inner_env.random_goal = hyperparameters["random_goal"]
+            print("======> Random goal: %s"%inner_env.random_goal)
     else:
         # q networks
         hyperparameters["model_constructor"] = fc_relu_q
@@ -60,8 +116,13 @@ def main(config_file_name):
     )
 
     # plot training results
-    plot_returns_100(runs_dir, timesteps=hyperparameters["timesteps"])
+    plot_returns_100(runs_dir=runs_dir, 
+        runs_name=hyperparameters["runs_name"], 
+        timesteps=hyperparameters["timesteps"])
 
 if __name__ == "__main__":
     #main(config_file_name = "dqn-cartpole.yaml")
-    main(config_file_name = "goal-dqn-bitflip.yaml")
+    #main(config_file_name = "goal-dqn-bitflip.yaml")
+    #main(config_file_name = "her-dqn-bitflip.yaml")
+    main(config_file_name = "goal-dqn-fourroom.yaml")
+    #main(config_file_name = "her-dqn-fourroom.yaml")

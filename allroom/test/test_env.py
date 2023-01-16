@@ -12,12 +12,17 @@ import multiworld.envs.gridworlds
 
 def test_env(env_id, render=False):
     env = create_env(env_id)
+    # if hasattr(env.unwrapped, 'random_start'):
+    #     env.unwrapped.random_start = False
+    # if hasattr(env.unwrapped, 'random_goal'):
+    #     env.unwrapped.random_goal = False
     
-    for episode in range(2):
+    for episode in range(3):
         print("--------------------------------------")
         print('Episode: {}'.format(episode))
         state = env.reset()
-        #print("State: %s"%state)
+        
+        print("State: %s"%state)
         if is_instance_goalreaching_env(env):
             print("Achieved goal: %s"%env.achieved_goal)
             print("Desired goal: %s"%env.desired_goal)
@@ -148,10 +153,11 @@ if __name__ == "__main__":
     maze_list = ['empty-maze-v0', 'umaze-v0', 'four-room-v0']
     bit_flip = ['bitflip-v0']
 
-    test_envs(d4rl_env_list)
-    test_envs(gym_goal_env_list)
-    test_envs(gcsl_env_list)
-    test_envs(maze_list)
+    # test_envs(d4rl_env_list)
+    # test_envs(gym_goal_env_list)
+    # test_envs(gcsl_env_list)
+    # test_envs(maze_list)
+
     #test_env('four-room-v0', render=False)
     #test_env('GoalGridworld-v0', render=True)
     #test_env("parking-v0", render=False)
@@ -161,7 +167,7 @@ if __name__ == "__main__":
     #env = gym.make("parking-v0")
     #print(get_wrapper_class(env))
     #test_env(env_id="pointmass-rooms-v0")
-    #test_env(env_id="bitflip-v0")
+    test_env(env_id="bitflip-v0")
 
     #test_all_env('four-room-v0')
     #test_all_env('bitflip-v0')
